@@ -1,8 +1,12 @@
 # home_page.py
+import time
 
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+
+import data
+
 
 class HomePage:
     def __init__(self, driver):
@@ -27,3 +31,13 @@ class HomePage:
         WebDriverWait(self.driver, 15).until(
             EC.element_to_be_clickable((By.XPATH, "//button[@type='submit' and contains(., 'Sign in')]"))
         ).click()
+
+    def login(self, email, password):  # ✅ Correct
+        self.click_login_button()
+        self.enter_email(email)
+        self.enter_password(password)
+        time.sleep(1)
+        self.click_Signin_button()
+        time.sleep(3)
+
+
