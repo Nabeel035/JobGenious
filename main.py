@@ -3,7 +3,8 @@ from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
 from home_page import HomePage
-import data  # your data.py file
+from job_description import JobDescriptionPage
+import data
 
 class TestJobGenious:
     def setup_method(self):
@@ -11,17 +12,21 @@ class TestJobGenious:
         options.add_argument("--start-maximized")
         service = Service()
         self.driver = webdriver.Chrome(service=service, options=options)
-        self.driver.get("https://www.gojobgenius.com/")
+        self.driver.get(data.JOBGENIOUS_URL)
         time.sleep(2)
 
-    def test_login_button_click(self):
+
+    def test_create_job(self):
+        # Initialize page objects
         home = HomePage(self.driver)
-        home.click_login_button()
-        home.enter_email(data.EMAIL)
-        home.enter_password(data.PASSWORD)
+        # Call the login method from HomePage
+        home.login(data.EMAIL, data.PASSWORD)
+
+        # Call the job creation method from JobDescriptionPage
+        job_page = JobDescriptionPage(self.driver)
+        job_page.create_job_description()
+        # Optional: wait after login to dashboard
         time.sleep(2)
-        home.click_Signin_button()
-        time.sleep(5)  # Optional: Replace with assertion
 
     def teardown_method(self):
         self.driver.quit()
