@@ -119,8 +119,25 @@ class JobDescriptionPage:
             print("✅ 'Create New Job Description' dialog opened.")
 
             # 4. Fill job title
-            self.form_field.select_job_title()
+            job_title = data.JOB_TITLE  # from data.py
+
+            # Check for duplicates
+            existing_titles = [
+                row.text.strip()
+                for row in driver.find_elements(By.XPATH, "//table//tr/td[1]")  # Assuming first column is job title
+            ]
+
+            if job_title in existing_titles:
+                print(f"⚠️ Job title '{job_title}' already exists!")
+                job_title = f"{job_title} duplicate."
+                print(f"ℹ️ Updated title to '{job_title}'.")
+
+            # Pass the final title into your form field selection
+            self.form_field.select_job_title(job_title)
             time.sleep(2)
+
+            #self.form_field.select_job_title()
+            #time.sleep(2)
 
             # 5. Select or Create Company
             self.form_field.select_or_create_company(data.HIRING_COMPANY)
