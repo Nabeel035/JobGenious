@@ -22,5 +22,9 @@ class TestJobGenious:
         # Call the login method from HomePage
         home.login(data.EMAIL, data.PASSWORD)
 
+        time.sleep(2)
+        home.logout()
+        time.sleep(5)
+
     def teardown_method(self):
         self.driver.quit()
