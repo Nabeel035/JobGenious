@@ -14,45 +14,58 @@ class FormFields:
         self.driver = driver
         self.wait = WebDriverWait(driver, 5)
 
-    def select_job_title(self):
-        job_title_field = WebDriverWait(self.driver, 10).until(
-            EC.presence_of_element_located((By.NAME, "title"))
-        )
+
+    #def select_job_title(self):
+        #job_title_field = WebDriverWait(self.driver, 10).until(
+         #   EC.presence_of_element_located((By.NAME, "title"))
+       # )
+        #job_title_field.clear()
+        #time.sleep(3)
+        #job_title_field.send_keys(data.JOB_TITLE)
+        #print(f"✅ Job title filled: {data.JOB_TITLE}")
+
+    def select_job_title(self, title=None):
+        """
+        Selects or fills in the job title field.
+        If `title` is not provided, uses JOB_TITLE from data.py.
+        """
+        job_title_value = title if title else data.JOB_TITLE
+
+        job_title_field = self.driver.find_element(By.NAME, "title")
         job_title_field.clear()
-        time.sleep(3)
-        job_title_field.send_keys(data.JOB_TITLE)
-        print(f"✅ Job title filled: {data.JOB_TITLE}")
+        job_title_field.send_keys(job_title_value)
 
     def select_or_create_company(self, company_name):
         wait = WebDriverWait(self.driver, 5)
 
-        # 1️⃣ Open the "Hiring Company" dropdown
+        # Open dropdown
         wait.until(EC.element_to_be_clickable(
             (By.XPATH, "//button[contains(., 'Company hiring for this position')]"))
         ).click()
 
-        # 2️⃣ Wait for search input to appear and type the company name
+        # Type company name
         search_input = wait.until(EC.presence_of_element_located(
-            (By.XPATH, "//input[@placeholder='Search companies...']")
-        ))
+            (By.XPATH, "//input[@placeholder='Search companies...']")))
         search_input.clear()
         search_input.send_keys(company_name)
 
-        try:
-            # 3️⃣ If the company exists in the list, click it
-            existing_company = wait.until(EC.element_to_be_clickable(
-                (By.XPATH, f"//div[contains(@class,'company-option') and text()='{company_name}']"))
-            )
-            existing_company.click()
-            print(f"Selected existing company: {company_name}")
+        # Match nested <span>
+        company_locator = (
+            By.XPATH,
+            f"//div[@role='option']//*[normalize-space(text())='{company_name}']"
+        )
 
-        except:
-            # 4️⃣ Otherwise, click the "Use 'Company_Name'" button to create it
+        try:
+            wait.until(EC.visibility_of_element_located(company_locator))
+            wait.until(EC.element_to_be_clickable(company_locator)).click()
+            print(f"✅ Selected existing company: {company_name}")
+        except TimeoutException:
+            print(f"⚠ Company '{company_name}' not found, creating new one...")
             use_button = wait.until(EC.element_to_be_clickable(
-                (By.XPATH, f"//button[contains(., 'Use \"{company_name}\"')]"))
-            )
+                (By.XPATH, f"//button[contains(., 'Use \"{company_name}\"')]")
+            ))
             use_button.click()
-            print(f"Created and selected new company: {company_name}")
+            print(f"✅ Created and selected new company: {company_name}")
 
     def select_work_arrangement(self, arrangement):
         valid_options = ["Remote", "On-site", "Hybrid"]
