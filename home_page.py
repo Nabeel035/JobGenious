@@ -1,6 +1,7 @@
 # home_page.py
 import time
 
+from selenium.common import TimeoutException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
@@ -16,6 +17,7 @@ class HomePage:
         WebDriverWait(self.driver, 15).until(
             EC.element_to_be_clickable((By.XPATH, "//button[normalize-space()='Log In']"))
         ).click()
+
 
     def enter_email(self, email):
         WebDriverWait(self.driver, 10).until(
@@ -39,5 +41,16 @@ class HomePage:
         time.sleep(1)
         self.click_Signin_button()
         time.sleep(3)
+
+    def logout(self):
+        wait = WebDriverWait(self.driver, 10)
+        try:
+            logout_button = wait.until(
+                EC.element_to_be_clickable((By.XPATH, "//button[normalize-space()='Logout']"))
+            )
+            logout_button.click()
+            print("✅ Successfully logged out")
+        except TimeoutException:
+            print("⚠ Logout button not found or not clickable")
 
 
