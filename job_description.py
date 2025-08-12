@@ -1,20 +1,17 @@
 import time
 
-
 from selenium.common import TimeoutException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support import expected_conditions as EC, wait
 import data
 from form_fields import FormFields
-from data import WORK_ARRANGEMENT
 
 
 class JobDescriptionPage:
     def __init__(self, driver):
         self.driver = driver
         self.form_field = FormFields(driver)  # Initialize helper class
-        self.wait = WebDriverWait(driver, 10)
         self.wait = WebDriverWait(driver, 10)
 
     # Locators
@@ -133,33 +130,37 @@ class JobDescriptionPage:
             self.form_field.select_work_arrangement(data.WORK_ARRANGEMENT)
             time.sleep(2)
 
-            # Split WORK_LOCATION into main and qualifier parts (e.g. "Remote - Anywhere" and "Global")
-            location_parts = data.WORK_LOCATION.rsplit(" ", 1)
-            location_main = location_parts[0]  # e.g. "Remote - Anywhere"
-            location_qualifier = location_parts[1] if len(location_parts) > 1 else ""  # e.g. "Global"
-
-            # Call the method from FormFields with work arrangement and location parts
-            self.form_field.select_work_location(data.WORK_ARRANGEMENT, location_main, location_qualifier)
-            time.sleep(2)
-
-            # Suppose data.WORK_LOCATION = "Remote - Anywhere Global"
-            # Split into main and qualifier parts
-            location_parts = data.WORK_LOCATION.rsplit(" ", 1)
-            location_main = location_parts[0]
-            location_qualifier = location_parts[1] if len(location_parts) > 1 else ""
 
             # 6. Select Work Location
-            self.form_field.select_work_location(data.WORK_ARRANGEMENT, location_main, location_qualifier)
+            self.form_field.select_work_location(data.WORK_LOCATION)
             time.sleep(2)
 
-            self.driver.find_element(By.NAME, "employment_type").send_keys(data.EMPLOYMENT_TYPE)
-            self.driver.find_element(By.NAME, "experience_level").send_keys(data.EXPERIENCE_LEVEL)
-            self.driver.find_element(By.NAME, "salary_range").send_keys(data.SALARY_RANGE)
-            self.driver.find_element(By.NAME, "additional_details").send_keys(data.ADDITIONAL_DETAILS)
+            #7 - Select the Job Type
+            self.form_field.select_employment_type(data.EMPLOYMENT_TYPE)
+            time.sleep(3)
+
+            #8 - Select the Experience
+            self.form_field.select_experience_level(data.EXPERIENCE_LEVEL)
+            time.sleep(3)
+
+            #9 - Select the Salary Range
+            self.form_field.enter_salary_range(data.SALARY_RANGE)
+            time.sleep(3)
+
+            #10 - Additional Details
+            self.form_field.fill_additional_details(data.ADDITIONAL_DETAILS)
+            time.sleep(3)
 
             # Submit
             self.driver.find_element(*self.SUBMIT_BUTTON).click()
             print("[INFO] Job description created successfully.")
+
+            # Wait for page/job description to load before clicking Download
+            download_button = WebDriverWait(driver, 50).until(
+                EC.element_to_be_clickable((By.XPATH, "//button[normalize-space()='Download']"))
+            )
+            download_button.click()
+            print("✅ Download button clicked successfully")
 
         except Exception as e:
             print(f"❌ Error filling job description form: {e}")

@@ -1,3 +1,6 @@
+import time
+
+from selenium.common import TimeoutException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
@@ -16,6 +19,7 @@ class FormFields:
             EC.presence_of_element_located((By.NAME, "title"))
         )
         job_title_field.clear()
+        time.sleep(3)
         job_title_field.send_keys(data.JOB_TITLE)
         print(f"✅ Job title filled: {data.JOB_TITLE}")
 
@@ -68,6 +72,7 @@ class FormFields:
             "//label[contains(text(),'Work Arrangement')]/parent::div//button[@role='combobox']"
         )))
         dropdown_btn.click()
+        time.sleep(3)
 
         # Wait for dropdown options to appear
         wait.until(EC.presence_of_all_elements_located((
@@ -84,112 +89,125 @@ class FormFields:
 
         print(f"✅ Selected work arrangement: {arrangement}")
 
-    def select_option_by_parts(self, main_text, qualifier_text=""):
+    def select_work_location(self, location_name):
         """
-        Generic method to select dropdown option where label is split into main and qualifier parts.
-        qualifier_text is optional.
+        Safely select the work location from the dropdown.
         """
+        try:
+            wait = WebDriverWait(self.driver, 10)
 
-        # Wait for options container and click dropdown if needed (adjust locator as needed)
-        # Assuming dropdown is already open when this method is called
-        # If not, you can add logic to click the dropdown before calling this method
+            # 1. Open the Work Location dropdown
+            dropdown = wait.until(EC.element_to_be_clickable(
+                (By.XPATH, "//label[contains(., 'Work Location')]/following-sibling::div")
+            ))
+            dropdown.click()
+            time.sleep(3)
+            print(f"✅ Opened Work Location dropdown for: {location_name}")
 
-        if qualifier_text:
-            option_xpath = (
-                f"//div[@role='option' and "
-                f".//span[normalize-space()='{main_text}'] and "
-                f".//div[contains(@class, 'rounded-full') and normalize-space()='{qualifier_text}']]"
-            )
-        else:
-            option_xpath = (
-                f"//div[@role='option' and .//span[normalize-space()='{main_text}']]"
-            )
-
-        option = self.wait.until(EC.element_to_be_clickable((By.XPATH, option_xpath)))
-        option.click()
-        print(f"✅ Selected option: '{main_text}' '{qualifier_text}'")
-
-    def select_work_location(self, work_arrangement, location_main, location_qualifier=""):
-            """
-            Select Work Location based on dependent Work Arrangement.
-            """
-
-            valid_options_map = {
-                "Remote": [
-                    ("Remote - Anywhere", "Global"),
-                    ("Remote - US Only", ""),
-                    ("Remote - North America", ""),
-                    ("Remote - EST Timezone", ""),
-                    ("Remote - CST Timezone", ""),
-                    ("Remote - MST Timezone", ""),
-                    ("Remote - PST Timezone", ""),
-                ],
-                "On-site": [
-                    ("New York, NY", ""),
-                    ("Los Angeles, CA", ""),
-                    ("Chicago, IL", ""),
-                    ("Houston, TX", ""),
-                    ("Phoenix, AZ", ""),
-                    ("Philadelphia, PA", ""),
-                    ("San Antonio, TX", ""),
-                ],
-                "Hybrid": [
-                    ("Remote - Anywhere", "Global"),
-                    ("New York, NY", ""),
-                    ("Los Angeles, CA", ""),
-                    ("Chicago, IL", ""),
-                    ("Houston, TX", ""),
-                    ("Phoenix, AZ", ""),
-                    ("Philadelphia, PA", ""),
-                    ("San Antonio, TX", ""),
-                ]
-            }
-
-            if work_arrangement not in valid_options_map:
-                raise ValueError(f"Unknown work arrangement: {work_arrangement}")
-
-            valid_locations = valid_options_map[work_arrangement]
-
-            if (location_main, location_qualifier) not in valid_locations:
-                raise ValueError(
-                    f"Invalid Work Location '{location_main} {location_qualifier}'. Expected one of {valid_locations}")
-
-            wait = WebDriverWait(self.driver, 15)
-
-            # Wait for Work Location label to ensure dropdown is ready
-            wait.until(EC.visibility_of_element_located((
-                By.XPATH, "//label[contains(text(),'Work Location')]"
-            )))
-
-            # Open the dropdown
-            dropdown_btn = wait.until(EC.element_to_be_clickable((
-                By.XPATH, "//label[contains(text(),'Work Location')]/parent::div//button[@role='combobox']"
-            )))
-            dropdown_btn.click()
-
-            # Wait for all options to appear
-            wait.until(EC.presence_of_all_elements_located((
-                By.XPATH, "//div[@role='option']"
-            )))
-
-            # Build XPath for option ignoring SVG and matching visible text exactly
-            # The text node will be inside a div child ignoring the SVG sibling
-            if location_qualifier:
-                # Match main text inside a div plus qualifier inside sibling div (like "Global")
-                xpath_option = (
-                    f"//div[@role='option' and .//div[normalize-space(text())='{location_main}'] "
-                    f"and .//div[contains(text(),'{location_qualifier}')]]"
-                )
-            else:
-                # Match the visible text ignoring SVG inside a div
-                xpath_option = (
-                    f"//div[@role='option' and .//div[normalize-space(text())='{location_main}']]"
-                )
-
+            # 2. Wait for and click the desired location
             option = wait.until(EC.element_to_be_clickable((
                 By.XPATH,
-                xpath_option
+                f"//div[@class='flex items-center justify-between w-full']//span[normalize-space()='{location_name}']"
             )))
             option.click()
+            print(f"✅ Selected work location: {location_name}")
 
-            print(f"✅ Selected work location: {location_main} {location_qualifier}".strip())
+            # Scroll to Employment Type label so it's visible before selection
+            employment_label = wait.until(EC.presence_of_element_located((
+                By.XPATH, "//label[normalize-space()='Employment Type']"
+            )))
+            self.driver.execute_script("arguments[0].scrollIntoView({behavior: 'smooth', block: 'center'});",
+                                       employment_label)
+            print("📜 Scrolled to Employment Type section.")
+
+        except TimeoutException:
+            print(f"❌ Timeout: Could not find or select work location '{location_name}'")
+            raise
+        except Exception as e:
+            print(f"❌ Error selecting work location '{location_name}': {e}")
+            raise
+
+
+    def select_employment_type(self, option_text):
+        wait = WebDriverWait(self.driver, 10)
+
+        valid_options = [
+            "Full-time",
+            "Part-time",
+            "Contract",
+            "Freelance",
+            "Internship"
+        ]
+
+        if option_text not in valid_options:
+            raise ValueError(f"Invalid Employment Type: '{option_text}'. Valid: {valid_options}")
+
+        dropdown_btn_xpath = "//label[normalize-space()='Employment Type']/following-sibling::button"
+        dropdown_btn = wait.until(EC.element_to_be_clickable((By.XPATH, dropdown_btn_xpath)))
+        dropdown_btn.click()
+        time.sleep(3)
+
+        option_xpath = f"//body//div[@role='option' and normalize-space()='{option_text}']"
+        option = wait.until(EC.element_to_be_clickable((By.XPATH, option_xpath)))
+        option.click()
+
+        print(f"✅ Selected Employment Type: {option_text}")
+
+    def select_experience_level(self, level):
+        driver = self.driver
+        wait = WebDriverWait(driver, 10)
+
+        valid_options = ["Entry Level", "Mid Level", "Senior Level", "Lead Level", "Executive Level"]  # adjust to actual site values
+        if level not in valid_options:
+            raise ValueError(f"Invalid Experience Level: {level}")
+
+        # Step 1: Click the combobox
+        dropdown_btn = wait.until(EC.element_to_be_clickable((
+            By.XPATH, "//label[normalize-space()='Experience Level']/following-sibling::button"
+        )))
+        dropdown_btn.click()
+        time.sleep(3)
+
+        # Step 2: Wait for and click the matching option (Radix portals may put it in body)
+        option_xpath = f"//body//div[@role='option' and normalize-space()='{level}']"
+        option = wait.until(EC.element_to_be_clickable((By.XPATH, option_xpath)))
+        option.click()
+
+        print(f"✅ Selected Experience Level: {level}")
+
+    def enter_salary_range(self, salary_text):
+        wait = WebDriverWait(self.driver, 10)
+
+        print(f"💰 Requested salary range: {salary_text}")
+
+        if not salary_text.strip():
+            print("⚠️ Salary range is empty — skipping input.")
+            return
+
+        salary_input_xpath = "//input[@id='salaryRange']"
+        salary_input = wait.until(EC.element_to_be_clickable((By.XPATH, salary_input_xpath)))
+
+        # Clear any existing value before typing
+        salary_input.clear()
+        salary_input.send_keys(salary_text)
+
+        print(f"✅ Entered salary range: {salary_text}")
+
+    def fill_additional_details(self, details_text):
+        wait = WebDriverWait(self.driver, 10)
+
+        # Locate the textarea
+        textarea = wait.until(EC.presence_of_element_located((By.ID, "description")))
+
+        # Scroll into view so it's visible
+        self.driver.execute_script("arguments[0].scrollIntoView({behavior: 'smooth', block: 'center'});", textarea)
+
+        # Clear any pre-filled text
+        textarea.clear()
+
+        # Enter the provided details
+        textarea.send_keys(details_text)
+
+        print(f"📝 Additional Details filled with: {details_text}")
+
+
