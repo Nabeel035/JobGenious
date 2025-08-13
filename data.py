@@ -13,3 +13,10 @@ EXPERIENCE_LEVEL = "Senior Level"
 SALARY_RANGE = "$5000-80000"
 ADDITIONAL_DETAILS = "Experience: Minimum 3 Years","Tools: VS Code,pytest,C#"
 
+# Job Description Page Search
+SEARCH_JOB = "Developer"
+
+# Apply Filters:
+STATUS = None
+COMPANY = None
+SORT = "Title (Z-A)"
