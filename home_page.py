@@ -1,13 +1,8 @@
-# home_page.py
 import time
-
 from selenium.common import TimeoutException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-
-import data
-
 
 class HomePage:
     def __init__(self, driver):
