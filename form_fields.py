@@ -14,16 +14,6 @@ class FormFields:
         self.driver = driver
         self.wait = WebDriverWait(driver, 5)
 
-
-    #def select_job_title(self):
-        #job_title_field = WebDriverWait(self.driver, 10).until(
-         #   EC.presence_of_element_located((By.NAME, "title"))
-       # )
-        #job_title_field.clear()
-        #time.sleep(3)
-        #job_title_field.send_keys(data.JOB_TITLE)
-        #print(f"✅ Job title filled: {data.JOB_TITLE}")
-
     def select_job_title(self, title=None):
         """
         Selects or fills in the job title field.
