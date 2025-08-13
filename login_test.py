@@ -23,6 +23,7 @@ class TestJobGenious:
         home.login(data.EMAIL, data.PASSWORD)
 
         time.sleep(2)
+        #logout the account
         home.logout()
         time.sleep(5)
 
