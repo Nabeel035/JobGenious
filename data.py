@@ -4,6 +4,8 @@ JOBGENIOUS_URL = "https://www.gojobgenius.com/"
 EMAIL = "imnabeel118@gmail.com"
 PASSWORD = "Mns@123456"
 
+
+
 JOB_TITLE = "C++ Developer"
 HIRING_COMPANY = "Cinox"
 WORK_ARRANGEMENT = "On-site"
