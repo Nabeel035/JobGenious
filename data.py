@@ -6,10 +6,10 @@ PASSWORD = "Mns@123456"
 
 
 
-JOB_TITLE = "C++ Developer"
+JOB_TITLE = "Python Developer"
 HIRING_COMPANY = "Cinox"
-WORK_ARRANGEMENT = "On-site"
-WORK_LOCATION = "Utah"
+WORK_ARRANGEMENT = "Remote"
+WORK_LOCATION = "Remote - PST Timezone"
 EMPLOYMENT_TYPE = "Internship"
 EXPERIENCE_LEVEL = "Senior Level"
 SALARY_RANGE = "$5000-80000"
