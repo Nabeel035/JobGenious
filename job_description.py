@@ -136,9 +136,6 @@ class JobDescriptionPage:
             self.form_field.select_job_title(job_title)
             time.sleep(2)
 
-            #self.form_field.select_job_title()
-            #time.sleep(2)
-
             # 5. Select or Create Company
             self.form_field.select_or_create_company(data.HIRING_COMPANY)
             time.sleep(2)
@@ -200,5 +197,16 @@ class JobDescriptionPage:
             print(f"❌ Error creating job description: {e}")
             raise
 
+    def job_list_page(self):
+        # Wait for the Job Descriptions link to be clickable
+        job_list_link = self.wait.until(
+            EC.element_to_be_clickable((By.XPATH, "//a[@href='/job-descriptions']"))
+        )
+        job_list_link.click()
+
+        # Optional: Wait for the job descriptions page to load (adjust locator)
+        self.wait.until(
+            EC.presence_of_element_located((By.XPATH, "//h1[contains(text(),'Job Descriptions')]"))
+        )
 
 
